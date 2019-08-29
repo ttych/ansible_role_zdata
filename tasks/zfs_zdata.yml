@@ -1,0 +1,47 @@
+---
+
+- name: check zdata pool
+  shell: zfs list zdata
+  register: zdata_status
+  changed_when: False
+  ignore_errors: yes
+
+- name: Include zfs_zdata vars
+  include_vars:
+    file: zfs_zdata.yml
+
+- fail: msg="Variable zdata_sets is required"
+  when: zdata_sets is not defined
+
+- name: set zdata pool properties
+  zfs:
+    name: zdata
+    state: present
+    extra_zfs_properties:
+      atime: off
+      compression: 'lz4'
+      mountpoint: 'legacy'
+      sharenfs: off
+      sharesmb: off
+  when: zdata_status.rc == 0
+
+- name: create zdata datasets
+  zfs:
+    name: "zdata/{{ dataset.name }}"
+    state: present
+    extra_zfs_properties: "{{ dataset.properties }}"
+  with_items: "{{ zdata_sets }}"
+  loop_control:
+    loop_var: dataset
+  when: zdata_status.rc == 0
+
+- name: set zdata datasets permissions
+  file:
+    path: "{{ dataset.properties.mountpoint }}"
+    owner: "{{ dataset.owner }}"
+    group: "{{ dataset.group }}"
+    mode: "{{ dataset.mode }}"
+  with_items: "{{ zdata_sets }}"
+  loop_control:
+    loop_var: dataset
+  when: zdata_status.rc == 0 and dataset.properties.mountpoint is defined

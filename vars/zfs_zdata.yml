@@ -1,0 +1,27 @@
+---
+
+zdata_sets:
+  - name: data
+    owner: root
+    group: root
+    mode: '0755'
+    properties:
+      compression: 'lz4'
+      mountpoint: '/data'
+      sharenfs: off
+  - name: homes
+    owner: root
+    group: root
+    mode: '0755'
+    properties:
+      compression: 'lz4'
+      mountpoint: '/homes'
+      sharenfs: off
+  - name: share
+    owner: root
+    group: root
+    mode: '0755'
+    properties:
+      compression: 'lz4'
+      mountpoint: '/share'
+      sharenfs: off
